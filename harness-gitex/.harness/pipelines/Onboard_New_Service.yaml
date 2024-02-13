@@ -1,0 +1,128 @@
+pipeline:
+  name: Onboard New Service
+  identifier: Onboard_New_Service
+  projectIdentifier: DevOps_Experience
+  orgIdentifier: SE_Sandbox
+  tags: {}
+  stages:
+    - stage:
+        name: Onboarding
+        identifier: Onboarding
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Create Yaml File
+                  identifier: Create_Yaml_File
+                  spec:
+                    shell: Bash
+                    command: |-
+                      # Define service name and identifier
+                      service_name="<+pipeline.variables.service_name>"
+                      service_identifier="${service_name//-/}"  # Replace "-" with nothing
+                      service_identifier="${service_identifier// /_}"  # Replace spaces with "_"
+                      service_identifier="${service_identifier//[^a-zA-Z0-9_]/}"  # Remove special characters
+                      sed -i "s/<SERVICE>/$service_name/g" /harness/template.yaml
+                      sed -i "s/<SERVICEID>/$service_identifier/g" /harness/template.yaml
+
+                      # Create the YAML file
+                      # cat << EOF > /harness/service.yaml
+                      # service:
+                      #   name: $service_name
+                      #   identifier: $service_identifier
+                      #   orgIdentifier: SE_Sandbox
+                      #   projectIdentifier: DevOps_Experience
+                      #   serviceDefinition:
+                      #     spec:
+                      #       artifacts:
+                      #         primary:
+                      #           primaryArtifactRef: docker
+                      #           sources:
+                      #             - spec:
+                      #                 connectorRef: account.DockerHubDiego
+                      #                 imagePath: diegokoala/banking-cv-ff-demo
+                      #                 tag: <+input>
+                      #                 digest: ""
+                      #               identifier: docker
+                      #               type: DockerRegistry
+                      #     type: Kubernetes
+                      # EOF
+              - step:
+                  type: Run
+                  name: Create Service
+                  identifier: Create_Service
+                  spec:
+                    connectorRef: account.DockerHubDiego
+                    image: diegokoala/python-utils:latest
+                    shell: Python
+                    command: |-
+                      import requests
+
+                      # Define service name and identifier
+                      service_name = "<+pipeline.variables.service_name>"
+                      # Replace "-" with nothing and spaces with "_", then remove special characters
+                      service_identifier = service_name.replace("-", "").replace(" ", "_")
+
+                      # Set your variables
+                      org = "SE_Sandbox"
+                      project = "DevOps_Experience"
+                      api_key = "<+secrets.getValue('platform_key')>"
+                      url = f"https://app.harness.io/v1/orgs/{org}/projects/{project}/services"
+
+                      headers = {
+                          "Content-Type": "application/json",
+                          "Harness-Account": "6_vVHzo9Qeu9fXvj-AcbCQ",
+                          "x-api-key": '<+secrets.getValue("platform_key")>'
+                      }
+
+                      # Read YAML content from a file
+                      with open('/harness/template.yaml', 'r') as file:
+                          yaml_content = file.read()# .replace('\n', '\\n')
+
+                      # Prepare the data payload
+                      data = {
+                          "identifier": service_identifier,
+                          "name": service_name,
+                          "description": "This is an example service",
+                          "tags": {
+                              "tag1": "example-tag-1-value",
+                              "tag2": "example-tag-2-value"
+                          },
+                          "yaml": yaml_content
+                      }
+
+                      print(data)
+
+                      # Make the POST request
+                      response = requests.post(url, json=data, headers=headers)
+
+                      # Print the response
+                      print(response.status_code)
+                      print(response.text)
+          caching:
+            enabled: false
+            paths: []
+          slsa_provenance:
+            enabled: false
+  variables:
+    - name: service_name
+      type: String
+      description: ""
+      required: false
+      value: <+input>
+  properties:
+    ci:
+      codebase:
+        connectorRef: account.diegogithubapp
+        repoName: android_emulator
+        build: <+input>
