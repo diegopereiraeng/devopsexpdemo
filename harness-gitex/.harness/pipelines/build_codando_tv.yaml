@@ -1,0 +1,40 @@
+pipeline:
+  name: build codando tv
+  identifier: build_codando_tv
+  projectIdentifier: DevOps_Experience
+  orgIdentifier: SE_Sandbox
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: account.diegogithubapp
+        repoName: payments-validation
+        build: <+input>
+  stages:
+    - stage:
+        name: build
+        identifier: build
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Build
+                  identifier: Build
+                  spec:
+                    connectorRef: account.DockerHubDiego
+                    image: maven:3.8.6-openjdk-11
+                    shell: Sh
+                    command: |-
+                      mvn package -Dmaven.test.skip=true
+
+                      ls -ltra target/
