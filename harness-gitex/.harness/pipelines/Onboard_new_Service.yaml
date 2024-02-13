@@ -1,0 +1,60 @@
+pipeline:
+  name: Onboard new Service
+  identifier: Onboard_new_Service
+  projectIdentifier: DevOps_Experience
+  orgIdentifier: SE_Sandbox
+  tags: {}
+  stages:
+    - stage:
+        name: Onboard Service
+        identifier: Onboard_Service
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: false
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Create Repo
+                  identifier: Create_Repo
+                  spec:
+                    connectorRef: account.DockerHubDiego
+                    image: maniator/gh
+                    shell: Sh
+                    command: gh repo create <+pipeline.variables.name> --public
+                    envVariables:
+                      GITHUB_TOKEN: <+secrets.getValue("ghtoken")>
+                    imagePullPolicy: IfNotPresent
+  variables:
+    - name: name
+      type: String
+      description: ""
+      required: false
+      value: <+input>
+    - name: provider
+      type: String
+      description: ""
+      required: false
+      value: <+input>
+    - name: db
+      type: String
+      description: ""
+      required: false
+      value: <+input>
+    - name: cache
+      type: String
+      description: ""
+      required: false
+      value: <+input>
+    - name: lint
+      type: String
+      description: ""
+      required: false
+      value: <+input>
