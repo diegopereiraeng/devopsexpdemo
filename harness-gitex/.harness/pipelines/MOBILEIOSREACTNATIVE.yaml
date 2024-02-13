@@ -1,0 +1,14 @@
+pipeline:
+  name: MOBILE-IOS-REACT-NATIVE
+  identifier: MOBILEIOSREACTNATIVE
+  tags: {}
+  template:
+    templateRef: account.ReactNativeCICD
+    versionLabel: 0.0.1
+    templateInputs:
+      properties:
+        ci:
+          codebase:
+            build: <+input>
+  projectIdentifier: DevOps_Experience
+  orgIdentifier: SE_Sandbox
