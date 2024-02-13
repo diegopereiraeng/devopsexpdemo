@@ -1,0 +1,32 @@
+template:
+  name: valut
+  type: Stage
+  projectIdentifier: DevOps_Experience
+  orgIdentifier: SE_Sandbox
+  spec:
+    type: Custom
+    spec:
+      execution:
+        steps:
+          - step:
+              type: ShellScript
+              name: ShellScript_1
+              identifier: ShellScript_1
+              spec:
+                shell: Bash
+                onDelegate: true
+                source:
+                  type: Inline
+                  spec:
+                    script: |-
+                      echo "vault integration"
+
+                      echo "legal"
+                environmentVariables: []
+                outputVariables: []
+              timeout: 10m
+    when:
+      pipelineStatus: Success
+      condition: <+pipeline.variables.integrate_vault> == "yes"
+  identifier: valut
+  versionLabel: v2
