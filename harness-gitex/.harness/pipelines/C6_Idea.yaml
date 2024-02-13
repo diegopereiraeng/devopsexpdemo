@@ -1,0 +1,82 @@
+pipeline:
+  name: C6 Idea
+  identifier: C6_Idea
+  projectIdentifier: DevOps_Experience
+  orgIdentifier: SE_Sandbox
+  tags: {}
+  stages:
+    - parallel:
+        - stage:
+            name: Monit
+            identifier: Monit
+            description: ""
+            type: Custom
+            spec:
+              execution:
+                steps:
+                  - step:
+                      type: ShellScript
+                      name: ShellScript_1
+                      identifier: ShellScript_1
+                      spec:
+                        shell: Bash
+                        onDelegate: true
+                        source:
+                          type: Inline
+                          spec:
+                            script: echo "config monit"
+                        environmentVariables: []
+                        outputVariables: []
+                      timeout: 10m
+            tags: {}
+            when:
+              pipelineStatus: Success
+              condition: <+pipeline.variables.monit> == "yes"
+        - stage:
+            name: Vaut Integration
+            identifier: Vaut_Integration
+            template:
+              templateRef: valut
+              versionLabel: v1
+        - stage:
+            name: Backup
+            identifier: Backup
+            description: ""
+            type: Custom
+            spec:
+              execution:
+                steps:
+                  - step:
+                      type: ShellScript
+                      name: ShellScript_1
+                      identifier: ShellScript_1
+                      spec:
+                        shell: Bash
+                        onDelegate: true
+                        source:
+                          type: Inline
+                          spec:
+                            script: echo "backup"
+                        environmentVariables: []
+                        outputVariables: []
+                      timeout: 10m
+            tags: {}
+            when:
+              pipelineStatus: Success
+              condition: <+pipeline.variables.backup> == "yes"
+  variables:
+    - name: integrate_vault
+      type: String
+      description: ""
+      required: false
+      value: <+input>.allowedValues(yes,no)
+    - name: backup
+      type: String
+      description: ""
+      required: false
+      value: <+input>.allowedValues(yes,no)
+    - name: monit
+      type: String
+      description: ""
+      required: false
+      value: <+input>.allowedValues(yes,no)
