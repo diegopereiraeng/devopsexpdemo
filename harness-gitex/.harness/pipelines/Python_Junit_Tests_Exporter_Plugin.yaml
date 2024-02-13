@@ -1,0 +1,53 @@
+pipeline:
+  projectIdentifier: DevOps_Experience
+  orgIdentifier: SE_Sandbox
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: account.diegogithubapp
+        repoName: junit_tests_exporter
+        build: <+input>
+  stages:
+    - stage:
+        name: Build Image
+        identifier: Build_Image
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Version Exporter
+                  identifier: Version_Exporter
+                  spec:
+                    shell: Sh
+                    command: |
+                      export EXECUTION_VERSION=$(date +%Y%m%d).<+codebase.shortCommitSha>
+                    outputVariables:
+                      - name: EXECUTION_VERSION
+              - step:
+                  type: BuildAndPushDockerRegistry
+                  name: BuildAndPushDockerRegistry
+                  identifier: BuildAndPushDockerRegistry
+                  spec:
+                    connectorRef: account.DockerHubDiego
+                    repo: diegokoala/junit_tests_exporter
+                    tags:
+                      - latest
+                      - <+execution.steps.Version_Exporter.output.outputVariables.EXECUTION_VERSION>
+          caching:
+            enabled: true
+            paths: []
+          slsa_provenance:
+            enabled: false
+  identifier: Python_Junit_Tests_Exporter_Plugin
+  name: Python Junit Tests Exporter Plugin
