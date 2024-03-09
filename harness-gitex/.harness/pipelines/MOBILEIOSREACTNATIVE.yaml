@@ -96,6 +96,8 @@ pipeline:
                       EOF
                       echo "git configured"
 
+                      chmod 0600 /Users/anka/.netrc
+
                       # api key apple store:
                       keyfile="/private/tmp/harness/AuthKey.p8"
                       echo "creating key file"
