@@ -1,14 +1,19 @@
 pipeline:
+  properties:
+    ci:
+      codebase:
+        connectorRef: account.diegogithubapp
+        repoName: harness-react-native
+        build: <+input>
+  stages:
+    - stage:
+        name: Build and Deploy
+        identifier: Build_and_Deploy
+        template:
+          templateRef: account.CICDREACTNATIVE
+          versionLabel: 0.0.1
   name: MOBILE-IOS-REACT-NATIVE
   identifier: MOBILEIOSREACTNATIVE
   tags: {}
-  template:
-    templateRef: account.ReactNativeCICD
-    versionLabel: 0.0.1
-    templateInputs:
-      properties:
-        ci:
-          codebase:
-            build: <+input>
   projectIdentifier: DevOps_Experience
   orgIdentifier: SE_Sandbox
