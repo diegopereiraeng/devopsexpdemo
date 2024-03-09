@@ -7,11 +7,157 @@ pipeline:
         build: <+input>
   stages:
     - stage:
+        type: CI
+        spec:
+          cloneCodebase: true
+          platform:
+            os: MacOS
+            arch: Arm64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Build React Native and Test
+                  identifier: Test
+                  spec:
+                    shell: Bash
+                    command: |
+                      arch
+                      echo "native node:"
+                      node -v
+                      which node
+                      # brew update
+                      # brew install node@21
+                      mkdir node21
+                      cd node21
+                      curl -O https://nodejs.org/download/release/latest-v21.x/node-v21.7.1-darwin-arm64.tar.gz
+                      tar -xzf node-v21.7.1-darwin-arm64.tar.gz
+                      ls -ltra
+                      sudo mv node-v21.7.1-darwin-arm64 /usr/local/node-v21.7.1
+                      echo "node unpacked"
+
+                      echo "exporting to bash profile"
+                      export PATH=/usr/local/node-v21.7.1/bin:$PATH
+                      ls -ltra /usr/local/node-v21.7.1/bin
+                      # echo 'export PATH=/usr/local/node-v21.7.1/bin:$PATH' >> ~/.bash_profile
+                      # source ~/.bash_profile
+                      echo "node 21 installed"
+                      cd ..
+                      rm -Rf node21
+
+                      echo "installed node"
+                      node -v
+
+                      bundle install
+                      npm install
+
+                      npm test
+                      pwd
+                      ls -ltra
+
+                      ls -ltra ./test-results
+                      # cd ${HOME}
+                      # git update-index --assume-unchanged ios/$SCHEME.xcodeproj/project.pbxproj
+                    reports:
+                      type: JUnit
+                      spec:
+                        paths:
+                          - ./test-results/jest-junit.xml
+              - step:
+                  type: Run
+                  name: Build IOS and Upload to Test Flight
+                  identifier: Build_App_and_Upload_to_Test_Flight
+                  spec:
+                    shell: Sh
+                    command: |-
+                      # infra info
+                      # uname -m
+                      # if [[ $(softwareupdate --install-rosetta --agree-to-license 2>&1) == *"Rosetta is already installed"* ]]; then echo "Rosetta 2 is installed"; else echo "Rosetta 2 not found or installed"; fi
+                      # if [[ $(sysctl -in sysctl.proc_translated) == 1 ]]; then echo "Running under Rosetta 2"; else echo "Running natively on the architecture"; fi
+
+                      brew install watchman
+                      gem install ffi
+                      echo "arch:"
+                      sysctl -a | grep machdep.cpu.brand_string
+                      gem uninstall cocoapods
+                      # arch -arm64 brew install cocoapods
+                      # gem uninstall cocoapods
+                      gem install cocoapods -v 1.14.3
+
+
+                      echo "configuring git"
+                      cat <<EOF > ${HOME}/.netrc
+                      machine ${DRONE_NETRC_MACHINE}
+                      login ${DRONE_NETRC_USERNAME}
+                      password ${DRONE_NETRC_PASSWORD}
+                      EOF
+                      echo "git configured"
+
+                      # api key apple store:
+                      keyfile="/private/tmp/harness/AuthKey.p8"
+                      echo "creating key file"
+                      echo '<+secrets.getValue("IOS_DEMO_P8_FILE")>' > $keyfile
+                      echo "created key file"
+                      export KEY_PATH=$keyfile
+                      echo $KEY_PATH
+
+                      xcode-select --version
+
+                      # xcversion list
+                      # xcversion install 15.2
+                      # xcode-select --switch /Applications/Xcode-15.2.app
+                      sudo xcode-select -s /Applications/Xcode_14.3.app/Contents/Developer
+
+                      xcodebuild -version
+
+                      # bundle update fastlane
+                      # bundle exec fastlane env
+                      cd ios
+                      # ls -ltra
+                      # ls -ltra $SCHEME
+                      # arch
+                      # ls -ltra HarnessReact.xcodeproj/
+                      # arch -arm64 pod install
+
+                      # pod deintegrate
+                      # pod cache clean --all
+                      # rm -rf Pods/ | true
+                      # pod install
+                      bundle exec pod install --repo-update
+                      cd ..
+                      bundle exec fastlane beta --verbose
+                    privileged: false
+                    envVariables:
+                      WORKSPACE: ios/HarnessReact.xcworkspace
+                      SCHEME: HarnessReact
+                      APP_IDENTIFIER: <+secrets.getValue("APP_ID")>
+                      OLD_APPLE_ID: <+secrets.getValue("APPLE_ID")>
+                      TEAM_ID: <+secrets.getValue("TEAM_ID")>
+                      ITC_TEAM_ID: <+secrets.getValue("ITC_TEAM_ID")>
+                      MATCH_PASSWORD: <+secrets.getValue("MATCH_KEYCHAIN_PASSWORD")>
+                      MATCH_KEYCHAIN_PASSWORD: <+secrets.getValue("MATCH_KEYCHAIN_PASSWORD")>
+                      OLD_APP_STORE_CONNECT_APPLE_ID: <+secrets.getValue("APP_STORE_CONNECT_APPLE_ID")>
+                      APP_STORE_CONNECT_API_KEY_ISSUER_ID: <+secrets.getValue("APP_STORE_CONNECT_API_KEY_ISSUER_ID")>
+                      KEYCHAIN_PASSWORD: <+secrets.getValue("KEYCHAIN_PASS")>
+                      FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: <+secrets.getValue("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD")>
+                      FASTLANE_USER: <+secrets.getValue("APPLE_ID")>
+                      FASTLANE_PASSWORD: <+secrets.getValue("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD")>
+                      LC_ALL: en_US.UTF-8
+                      LANGUAGE: en_US.UTF-8
+                      LANG: en_US.UTF-8
+                      APP_STORE_CONNECT_API_KEY_KEY_ID: <+secrets.getValue("APP_STORE_CONNECT_API_KEY_KEY_ID")>
+                      OLD_MATCH_GIT_BASIC_AUTHORIZATION: ""
+          slsa_provenance:
+            enabled: false
+          caching:
+            enabled: false
+            paths: []
+            key: <+pipeline.properties.ci.codebase.repoName>
         name: Build and Deploy
         identifier: Build_and_Deploy
-        template:
-          templateRef: account.CICDREACTNATIVE
-          versionLabel: 0.0.1
   name: MOBILE-IOS-REACT-NATIVE
   identifier: MOBILEIOSREACTNATIVE
   tags: {}
