@@ -104,14 +104,14 @@ pipeline:
                       export KEY_PATH=$keyfile
                       echo $KEY_PATH
 
-                      xcode-select --version
+                      # xcode-select --version
 
-                      xcversion list
+                      # xcversion list
                       # xcversion install 15.2
                       # xcode-select --switch /Applications/Xcode-15.2.app
                       # sudo xcode-select -s /Applications/Xcode_14.3.app/Contents/Developer
 
-                      xcodebuild -version
+                      # xcodebuild -version
 
                       # bundle update fastlane
                       # bundle exec fastlane env
