@@ -106,10 +106,10 @@ pipeline:
 
                       xcode-select --version
 
-                      # xcversion list
+                      xcversion list
                       # xcversion install 15.2
                       # xcode-select --switch /Applications/Xcode-15.2.app
-                      sudo xcode-select -s /Applications/Xcode_14.3.app/Contents/Developer
+                      # sudo xcode-select -s /Applications/Xcode_14.3.app/Contents/Developer
 
                       xcodebuild -version
 
