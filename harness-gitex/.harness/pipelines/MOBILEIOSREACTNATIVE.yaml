@@ -156,6 +156,7 @@ pipeline:
                       APP_STORE_CONNECT_API_KEY_KEY_ID: <+secrets.getValue("APP_STORE_CONNECT_API_KEY_KEY_ID")>
                       OLD_MATCH_GIT_BASIC_AUTHORIZATION: aaaa
                       GITHUB_PAT: <+secrets.getValue("GITHUB_PAT")>
+                      SLACK_WEBHOOK_URL: <+secrets.getValue("SLACK_WEBHOOK_URL")>
           slsa_provenance:
             enabled: false
           caching:
