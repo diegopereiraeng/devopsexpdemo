@@ -98,7 +98,7 @@ pipeline:
 
                       chmod 0600 /Users/anka/.netrc
 
-                      git config credential.helper 'echo "username=x-access-token\npassword=$GITHUB_PAT"'
+                      git config --global credential.helper '!f() { echo "username=x-access-token"; echo "password=${GITHUB_PAT}"; }; f'
 
 
                       # api key apple store:
