@@ -98,6 +98,9 @@ pipeline:
 
                       chmod 0600 /Users/anka/.netrc
 
+                      git config credential.helper 'echo "username=x-access-token\npassword=$GITHUB_PAT"'
+
+
                       # api key apple store:
                       keyfile="/private/tmp/harness/AuthKey.p8"
                       echo "creating key file"
@@ -152,6 +155,7 @@ pipeline:
                       LANG: en_US.UTF-8
                       APP_STORE_CONNECT_API_KEY_KEY_ID: <+secrets.getValue("APP_STORE_CONNECT_API_KEY_KEY_ID")>
                       OLD_MATCH_GIT_BASIC_AUTHORIZATION: aaaa
+                      GITHUB_PAT: <+secrets.getValue("GITHUB_PAT")>
           slsa_provenance:
             enabled: false
           caching:
