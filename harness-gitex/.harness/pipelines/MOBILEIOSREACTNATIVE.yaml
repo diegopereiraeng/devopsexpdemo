@@ -156,6 +156,7 @@ pipeline:
                       OLD_MATCH_GIT_BASIC_AUTHORIZATION: aaaa
                       GITHUB_PAT: <+secrets.getValue("GITHUB_PAT")>
                       SLACK_WEBHOOK_URL: <+secrets.getValue("SLACK_WEBHOOK_URL")>
+                      BRANCH_NAME: <+codebase.branch>
           slsa_provenance:
             enabled: false
           caching:
